@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>India Trip Cost Estimator</title>
+    <style>
+        body {
+            font-family: 'Poppins', system-ui, sans-serif;
+            margin: 0;
+            background: linear-gradient(135deg, #f6f9ff 0%, #eef3ff 100%);
+            color: #1a2233;
+        }
+        
+        .wrap {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+        
+        h1 {
+            margin: 0 0 8px;
+            font-size: 26px;
+            color: #003366;
+        }
+        
+        p.lead {
+            margin: 0 0 20px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #003366;
+        }
+        
+        input,
+        select {
+            width: 90%;
+            height: 35px;
+            padding: 5px 10px;
+            border: 1.5px solid #d0d7e6;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        
+        input:focus,
+        select:focus {
+            border-color: #0056d6;
+            outline: none;
+            box-shadow: 0 0 6px rgba(0, 86, 214, 0.3);
+        }
+        
+        input:hover,
+        select:hover {
+            border-color: #007bff;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #007bff, #0056d6);
+            color: #fff;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            width: 150px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #0056d6, #003e9a);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .full {
+            grid-column: 1 / -1;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .results {
+            margin-top: 24px;
+            padding: 18px;
+            border-radius: 12px;
+            background: #f9fbff;
+            border: 1px solid #e3ebff;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card {
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e3ebff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .card strong {
+            color: #003366;
+            font-size: 15px;
+        }
+        
+        #totalRs,
+        #perPerson {
+            font-size: 20px;
+            color: #0056d6;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        
+        #breaklist div {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e6ebf5;
+            font-size: 14px;
+        }
+        
+        #breaklist div:last-child {
+            border-bottom: none;
+        }
+        
+        .dynamic-field {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>India Trip Cost Estimator</h1>
+        <p class="lead">Responsive single-file estimator — no database. Fill details and click <strong>Calculate</strong>.</p>
+
+        <form id="tripForm">
+            <div>
+                <label>Trip type</label>
+                <select id="tripType">
+          <option value="family">Family</option>
+          <option value="friends">Friends</option>
+        </select>
+            </div>
+
+            <div>
+                <label>From (city)</label>
+                <input id="fromCity" placeholder="e.g. Mumbai" required>
+            </div>
+
+            <div>
+                <label>To (city)</label>
+                <input id="toCity" placeholder="e.g. Goa" required>
+            </div>
+
+            <div>
+                <label>Adults</label>
+                <input id="adults" type="number" min="1" value="2" required>
+            </div>
+
+            <div>
+                <label>Children (age &lt;12)</label>
+                <input id="children" type="number" min="0" value="0">
+            </div>
+
+            <div>
+                <label>Trip nights</label>
+                <input id="nights" type="number" min="0" value="3">
+            </div>
+
+            <div class="full">
+                <label>Transport mode</label>
+                <select id="transport" onchange="showFields()">
+          <option value="flight">Flight</option>
+          <option value="train">Train</option>
+          <option value="car_rental">Car (rental)</option>
+          <option value="bus">Bus</option>
+          <option value="own_car">Own Car</option>
+        </select>
+            </div>
+
+            <!-- Dynamic transport fields -->
+            <div id="flightField" class="dynamic-field">
+                <label>Flight ticket price (one-way per person ₹)</label>
+                <input type="number" id="flightPrice" placeholder="e.g. 7000">
+            </div>
+
+            <div id="trainField" class="dynamic-field">
+                <label>Train ticket price (one-way per person ₹)</label>
+                <input type="number" id="trainPrice" placeholder="e.g. 800">
+            </div>
+
+            <div id="carField" class="dynamic-field">
+                <label>Car rental per day (₹)</label>
+                <input type="number" id="carRent" placeholder="e.g. 3000">
+            </div>
+
+            <div id="busField" class="dynamic-field">
+                <label>Bus ticket price (one-way per person ₹)</label>
+                <input type="number" id="busPrice" placeholder="e.g. 500">
+            </div>
+
+            <div id="ownCarFields" class="dynamic-field full" style="background:#f8fbff; padding:15px; border-radius:10px;">
+                <label><b>Own Car Details</b></label>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px;">
+                    <div>
+                        <label>Fuel Type</label>
+                        <select id="fuelType">
+              <option value="petrol">Petrol</option>
+              <option value="diesel">Diesel</option>
+            </select>
+                    </div>
+                    <div>
+                        <label>Fuel Price (₹/litre)</label>
+                        <input id="fuelPrice" type="number" placeholder="e.g. 100">
+                    </div>
+                    <div>
+                        <label>Mileage (km/litre)</label>
+                        <input id="mileage" type="number" placeholder="e.g. 15">
+                    </div>
+                    <div>
+                        <label>Distance (km, round trip)</label>
+                        <input id="distance" type="number" placeholder="e.g. 800">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label>Accommodation type</label>
+                <select id="accom">
+          <option value="budget">Budget</option>
+          <option value="mid">Mid-range</option>
+          <option value="luxury">Luxury</option>
+        </select>
+            </div>
+
+            <div>
+                <label>Meals per person/day (₹)</label>
+                <input id="mealPerDay" type="number" min="0" value="400">
+            </div>
+
+            <div>
+                <label>Activities & entrance fees (₹)</label>
+                <input id="activities" type="number" min="0" value="2000">
+            </div>
+
+            <div>
+                <label>Local transport/day (₹)</label>
+                <input id="localTransport" type="number" min="0" value="500">
+            </div>
+
+            <div class="full">
+                <small>Defaults: Flight ₹7000, Train ₹800, Car ₹3000/day, Bus ₹500 one-way.</small><br><br>
+                <button id="calc" type="button">Calculate</button>
+            </div>
+        </form>
+
+        <div id="output" class="results" style="display:none">
+            <h3>Estimated Trip Cost</h3>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <div class="card"><strong>Total Cost</strong>
+                    <div id="totalRs">₹0</div>
+                </div>
+                <div class="card"><strong>Per Person</strong>
+                    <div id="perPerson">₹0</div>
+                </div>
+            </div>
+            <div style="margin-top:12px"><strong>Breakdown</strong>
+                <div id="breaklist"></div>
+            </div>
+        </div>
+
+        <footer>Made for India trips • Responsive single file • No database</footer>
+    </div>
+
+    <script>
+        const DEFAULTS = {
+            flight: 7000,
+            train: 800,
+            car: 3000,
+            bus: 500,
+            child_discount: 0.5
+        };
+
+        function formatINR(x) {
+            return '₹' + Number(x).toLocaleString('en-IN');
+        }
+
+        function showFields() {
+            const mode = document.getElementById('transport').value;
+            document.querySelectorAll('.dynamic-field').forEach(el => el.style.display = 'none');
+            if (mode === 'flight') document.getElementById('flightField').style.display = 'block';
+            if (mode === 'train') document.getElementById('trainField').style.display = 'block';
+            if (mode === 'car_rental') document.getElementById('carField').style.display = 'block';
+            if (mode === 'bus') document.getElementById('busField').style.display = 'block';
+            if (mode === 'own_car') document.getElementById('ownCarFields').style.display = 'block';
+        }
+
+        document.getElementById('calc').addEventListener('click', () => {
+            const adults = +document.getElementById('adults').value;
+            const children = +document.getElementById('children').value;
+            const nights = +document.getElementById('nights').value;
+            const transport = document.getElementById('transport').value;
+            const accom = document.getElementById('accom').value;
+            const mealPerDay = +document.getElementById('mealPerDay').value;
+            const activities = +document.getElementById('activities').value;
+            const localTransport = +document.getElementById('localTransport').value;
+            const people = adults + children;
+
+            if (people <= 0) return alert('Please enter at least one traveler.');
+
+            // Calculate transport cost
+            let transportCost = 0;
+            if (transport === 'flight') {
+                const custom = +document.getElementById('flightPrice').value || DEFAULTS.flight;
+                transportCost = (adults * custom * 2) + (children * custom * 2 * DEFAULTS.child_discount);
+            } else if (transport === 'train') {
+                const custom = +document.getElementById('trainPrice').value || DEFAULTS.train;
+                transportCost = (adults * custom * 2) + (children * custom * 2 * DEFAULTS.child_discount);
+            } else if (transport === 'bus') {
+                const custom = +document.getElementById('busPrice').value || DEFAULTS.bus;
+                transportCost = (adults * custom * 2) + (children * custom * 2 * DEFAULTS.child_discount);
+            } else if (transport === 'car_rental') {
+                const custom = +document.getElementById('carRent').value || DEFAULTS.car;
+                transportCost = custom * nights;
+            } else if (transport === 'own_car') {
+                const mileage = +document.getElementById('mileage').value;
+                const distance = +document.getElementById('distance').value;
+                const fuelPrice = +document.getElementById('fuelPrice').value;
+                if (!mileage || !distance || !fuelPrice)
+                    return alert("Please fill all own car details.");
+                transportCost = (distance / mileage) * fuelPrice;
+            }
+
+            // Accommodation
+            let accomPerNight = accom === 'budget' ? 1500 : accom === 'mid' ? 3500 : 9000;
+            let rooms = Math.ceil(people / 2);
+            let accomCost = accomPerNight * nights * rooms;
+
+            // Meals & Local
+            let mealsTotal = (adults * mealPerDay + children * mealPerDay * DEFAULTS.child_discount) * nights;
+            let localTransportTotal = localTransport * nights;
+            let subtotal = transportCost + accomCost + mealsTotal + localTransportTotal + activities;
+            let buffer = Math.round(subtotal * 0.05);
+            let total = subtotal + buffer;
+            let perPerson = Math.round(total / people);
+
+            // Display
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('totalRs').textContent = formatINR(total);
+            document.getElementById('perPerson').textContent = formatINR(perPerson);
+            document.getElementById('breaklist').innerHTML = `
+        <div><span>Transport</span><span><b>${formatINR(transportCost)}</b></span></div>
+        <div><span>Accommodation</span><span><b>${formatINR(accomCost)}</b></span></div>
+        <div><span>Meals</span><span><b>${formatINR(mealsTotal)}</b></span></div>
+        <div><span>Local Transport</span><span><b>${formatINR(localTransportTotal)}</b></span></div>
+        <div><span>Activities</span><span><b>${formatINR(activities)}</b></span></div>
+        <div><span>Buffer (5%)</span><span><b>${formatINR(buffer)}</b></span></div>`;
+        });
+
+        // Show default field
+        showFields();
+    </script>
+</body>
+
+</html>
